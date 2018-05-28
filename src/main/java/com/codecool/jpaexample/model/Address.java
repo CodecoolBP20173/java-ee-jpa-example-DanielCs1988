@@ -2,16 +2,22 @@ package com.codecool.jpaexample.model;
 
 import javax.persistence.*;
 
-
+@NamedQuery(name = "getAddressByCity", query = "FROM Address WHERE city LIKE :city")
 @Entity
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String country;
+
+    @Column(name = "zip", length = 4)
     private String zipcode;
+
     private String city;
     private String addr;
+
+    @OneToOne
+    private Student student;
 
     public Address() {
     }

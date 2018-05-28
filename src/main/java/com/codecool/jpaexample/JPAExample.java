@@ -8,8 +8,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 public class JPAExample {
 
@@ -24,20 +23,25 @@ public class JPAExample {
             e.printStackTrace();
         }
 
-        Klass classBp2 = new Klass("Budapest 2016-2");
+        Klass classBp2 = new Klass("Budapest 2016-2", CCLocation.BUDAPEST);
         Address address = new Address("Hungary", "1234", "Budapest", "Macskakő út 5.");
-        Student student = new Student("Ödön", "odon@tokodon.hu", birthDate1, address);
+        Student student = new Student("Ödön", "odon@tokodon.hu", birthDate1, address, new ArrayList<>(Arrays.asList(
+                "123-456-789", "987-654-321"
+        )));
         classBp2.addStudent(student);
 
         EntityTransaction transaction = em.getTransaction();
         transaction.begin();
+        em.persist(classBp2);
         em.persist(address);
         em.persist(student);
         transaction.commit();
         System.out.println("Ödön saved.");
 
-        Address address2 = new Address("Hungary", "6789", "Budapest", "Harap u. 3.");
-        Student student2 = new Student("Aladár", "ktyfl@gmail.com", birthDate2, address);
+        Address address2 = new Address("Hungary", "6789", "Érd", "Harap u. 3.");
+        Student student2 = new Student("Aladár", "ktyfl@gmail.com", birthDate2, address2, new ArrayList<>(Arrays.asList(
+                "567-456-789", "987-321-321"
+        )));
         classBp2.addStudent(student2);
 
         transaction.begin();
@@ -58,11 +62,13 @@ public class JPAExample {
         System.out.println("--Found student #1");
         System.out.println("----name----" + foundStudent1.getName());
         System.out.println("----address of student----" + foundStudent1.getAddress());
+        System.out.println("\nWhole student object:\n" + foundStudent1 + "\n\n");
 
         Student foundStudent2 = em.find(Student.class, 2L);
         System.out.println("--Found student #2");
         System.out.println("----name----" + foundStudent2.getName());
         System.out.println("----address of student----" + foundStudent2.getAddress());
+        System.out.println("\nWhole student object:\n" + foundStudent2 + "\n\n");
 
         Address foundAddress1 = em.find(Address.class, 1L);
         System.out.println("--Found address #1");
@@ -71,6 +77,17 @@ public class JPAExample {
         Address foundAddress2 = em.find(Address.class, 2L);
         System.out.println("--Found address #2");
         System.out.println("----address----" + foundAddress2.getAddr());
+
+        Student queriedStudent = em.createQuery("SELECT s FROM Student s WHERE id = 1", Student.class)
+                .getSingleResult();
+        System.out.println(queriedStudent);
+
+        List<Student> students = em.createNamedQuery("getAllStudents", Student.class).getResultList();
+        System.out.println("\n" + students);
+
+        Address address = em.createNamedQuery("getAddressByCity", Address.class)
+                .setParameter("city", "Budapest").getSingleResult();
+        System.out.println(address);
 
         em.close();
         emf.close();
